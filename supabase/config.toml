@@ -1,0 +1,8 @@
+[functions.create-cashier]
+verify_jwt = true
+
+[functions.create-shop-admin]
+verify_jwt = true
+
+[functions.reset-owner-password]
+verify_jwt = true
