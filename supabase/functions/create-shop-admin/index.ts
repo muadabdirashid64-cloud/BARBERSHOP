@@ -96,7 +96,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Check email uniqueness
+    // Check email uniqueness in profiles table
     const { data: existingEmail } = await adminClient
       .from("profiles")
       .select("id")
@@ -104,6 +104,20 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (existingEmail) {
+      return new Response(JSON.stringify({ error: "This email is already registered. Please use a different email." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Also check auth.users directly — a user may exist in Auth without a profile
+    const { data: existingAuthUser } = await adminClient
+      .schema("auth")
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (existingAuthUser) {
       return new Response(JSON.stringify({ error: "This email is already registered. Please use a different email." }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
